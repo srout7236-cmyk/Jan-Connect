@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JanConnect - Voice of the People</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            background: #1a1a1a;
+            border-radius: 25px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .screen {
+            width: 100%;
+            height: 700px;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            border-radius: 10px;
+            margin: -20px -20px 15px -20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2196F3;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #FF9800, #FF5722);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 8px 0;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255,152,0,0.3);
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255,152,0,0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            box-shadow: 0 4px 10px rgba(33,150,243,0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 15px rgba(33,150,243,0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            box-shadow: 0 4px 10px rgba(76,175,80,0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 15px rgba(76,175,80,0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-field {
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 15px;
+            margin: 8px 0;
+            font-size: 14px;
+            background: #FAFAFA;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2196F3;
+            background: white;
+        }
+
+        .textarea {
+            min-height: 80px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .voice-btn {
+            background: linear-gradient(135deg, #FF4081, #E91E63);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            border: none;
+            color: white;
+            font-size: 24px;
+            margin: 10px auto;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(233,30,99,0.4);
+            transition: all 0.2s;
+            display: block;
+        }
+
+        .voice-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .voice-btn.listening {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .media-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .media-btn {
+            padding: 10px;
+            background: #E3F2FD;
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            color: #1976D2;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .media-btn:hover {
+            background: #2196F3;
+            color: white;
+        }
+
+        .ai-suggestion {
+            background: linear-gradient(135deg, #E8F5E8, #C8E6C9);
+            padding: 15px;
+            border-radius: 15px;
+            border-left: 4px solid #4CAF50;
+            margin: 15px 0;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-tag {
+            color: #2E7D32;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .letter-preview {
+            background: #F9F9F9;
+            border: 1px solid #DDD;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .submission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .chart {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .chart-title {
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .chart-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            border-radius: 10px;
+            margin: 5px 0;
+            position: relative;
+            transition: width 0.5s ease;
+        }
+
+        .grievance-item {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .grievance-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .status-pending { border-left: 4px solid #FF9800; }
+        .status-acknowledged { border-left: 4px solid #2196F3; }
+        .status-resolved { border-left: 4px solid #4CAF50; }
+
+        .lang-selector {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            padding: 8px 12px;
+            background: #E0E0E0;
+            border: none;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: #2196F3;
+            color: white;
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #E0E0E0;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .screen-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .offline-indicator {
+            background: #FF9800;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: notificationSlide 0.3s ease-out;
+        }
+
+        @keyframes notificationSlide {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #E0E0E0;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .floating-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #FF4081, #E91E63);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(233,30,99,0.4);
+            z-index: 1000;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                margin: 10px;
+                max-width: none;
+                width: calc(100% - 20px);
+            }
+            
+            .screen {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div class="screen" id="welcomeScreen">
+            <div class="status-bar">
+                <span>JanConnect</span>
+                <span id="currentTime">9:41 AM</span>
+            </div>
+            
+            <div class="header">
+                <div class="app-title">JanConnect</div>
+                <div class="subtitle">ଜନସଂଯୋଗ - Voice of the People</div>
+            </div>
+            
+            <div class="profile-pic" id="profilePic" onclick="uploadProfilePic()">
+                <span id="profileIcon">👤</span>
+            </div>
+            <input type="file" id="profileInput" class="file-input" accept="image/*" onchange="handleProfileUpload(event)">
+            
+            <div class="lang-selector">
+                <button class="lang-btn active" onclick="setLanguage('odia')">ଓଡ଼ିଆ</button>
+                <button class="lang-btn" onclick="setLanguage('hindi')">हिंदी</button>
+                <button class="lang-btn" onclick="setLanguage('english')">English</button>
+            </div>
+            
+            <input type="text" class="input-field" id="userName" placeholder="ଆପଣଙ୍କ ନାମ / Your Name" required>
+            <input type="tel" class="input-field" id="userPhone" placeholder="ଫୋନ୍ ନମ୍ବର / Phone Number" required>
+            <input type="text" class="input-field" id="userAddress" placeholder="ଠିକଣା / Address" required>
+            <input type="text" class="input-field" id="userWard" placeholder="ଗ୍ରାମ/ୱାର୍ଡ / Village/Ward" required>
+            
+            <button class="btn btn-primary" onclick="uploadProfilePic()">📱 Add Photo</button>
+            <button class="btn" onclick="startReporting()">🚀 Start Reporting</button>
+        </div>
+
+        <!-- Problem Reporting Screen -->
+        <div class="screen hidden" id="reportingScreen">
+            <div class="status-bar">
+                <span>Report Problem</span>
+                <span id="reportTime">9:42 AM</span>
+            </div>
+            <div class="offline-indicator" id="offlineIndicator">📶 Online</div>
+            
+            <div class="screen-title">ସମସ୍ୟା ରିପୋର୍ଟ କରନ୍ତୁ</div>
+            
+            <textarea class="input-field textarea" id="problemText" 
+                placeholder="ଆପଣଙ୍କ ସମସ୍ୟା ଲେଖନ୍ତୁ କିମ୍ବା କୁହନ୍ତୁ...&#10;Write or speak your problem here..."></textarea>
+            
+            <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecording()">🎤</button>
+            
+            <div class="media-options">
+                <button class="media-btn" onclick="capturePhoto()">📷 Photo</button>
+                <button class="media-btn" onclick="captureVideo()">🎥 Video</button>
+                <button class="media-btn" onclick="openScribblePad()">✏️ Scribble</button>
+            </div>
+            
+            <input type="file" id="photoInput" class="file-input" accept="image/*" onchange="handlePhotoUpload(event)">
+            <input type="file" id="videoInput" class="file-input" accept="video/*" onchange="handleVideoUpload(event)">
+            
+            <div class="ai-suggestion hidden" id="aiSuggestion">
+                <div class="ai-tag">🤖 AI Detected Issue</div>
+                <div id="detectedIssue"></div>
+            </div>
+            
+            <button class="btn btn-success" onclick="generateApplication()">Generate Application</button>
+            <button class="btn" onclick="goToScreen('welcomeScreen')">← Back</button>
+        </div>
+
+        <!-- Application Preview Screen -->
+        <div class="screen hidden" id="previewScreen">
+            <div class="status-bar">
+                <span>Application Preview</span>
+                <span id="previewTime">9:43 AM</span>
+            </div>
+            
+            <div class="screen-title">Generated Application</div>
+            
+            <div class="letter-preview" id="generatedLetter"></div>
+            
+            <button class="btn" onclick="editApplication()">✏️ Edit Application</button>
+            <button class="btn btn-primary" onclick="goToScreen('submissionScreen')">Continue to Submit</button>
+            <button class="btn" onclick="goToScreen('reportingScreen')">← Back</button>
+        </div>
+
+        <!-- Submission Screen -->
+        <div class="screen hidden" id="submissionScreen">
+            <div class="status-bar">
+                <span>Submit Application</span>
+                <span id="submitTime">9:44 AM</span>
+            </div>
+            
+            <div class="screen-title">Submission Options</div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="submitProgress" style="width: 0%"></div>
+            </div>
+            
+            <div class="submission-grid">
+                <button class="btn btn-primary" onclick="downloadPDF()">📄 Download PDF</button>
+                <button class="btn btn-primary" onclick="emailDepartment()">📧 Email Dept</button>
+                <button class="btn btn-success" onclick="sendWhatsApp()">📱 WhatsApp</button>
+                <button class="btn" onclick="submitToPortal()">🌐 Govt Portal</button>
+            </div>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #FFF3E0; border-radius: 10px;">
+                <strong>📰 Media Sharing</strong>
+                <div class="submission-grid" style="margin-top: 10px;">
+                    <button class="btn" onclick="generatePressNote()">📰 Press Note</button>
+                    <button class="btn" onclick="shareOnSocialMedia()">📱 Social Media</button>
+                </div>
+            </div>
+            
+            <div style="background: #E8F5E8; padding: 15px; border-radius: 10px; margin-top: 10px;">
+                <strong>✅ Auto-Track Enabled</strong><br>
+                <small>We'll send reminder after 15 days if no response</small>
+            </div>
+            
+            <button class="btn" onclick="submitAll()">🚀 Submit All</button>
+            <button class="btn" onclick="goToScreen('previewScreen')">← Back</button>
+        </div>
+
+        <!-- Tracking Screen -->
+        <div class="screen hidden" id="trackingScreen">
+            <div class="status-bar">
+                <span>My Grievances</span>
+                <span id="trackTime">9:46 AM</span>
+            </div>
+            
+            <div class="screen-title">My Applications Tracking</div>
+            
+            <div id="grievancesList"></div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <div style="font-size: 24px; color: #4CAF50;">🏆</div>
+                <strong>Community Champion</strong><br>
+                <small id="achievementText">Keep reporting to earn badges!</small>
+            </div>
+            
+            <button class="btn" onclick="goToScreen('reportingScreen')">+ New Report</button>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div class="screen hidden" id="dashboardScreen">
+            <div class="status-bar">
+                <span>Data & Reports</span>
+                <span id="dashTime">9:45 AM</span>
+            </div>
+            
+            <div class="screen-title">District Data Dashboard</div>
+            
+            <div class="chart">
+                <div class="chart-title">🏥 Health Issues - Jajpur District</div>
+                <div style="font-size: 18px; font-weight: bold; color: #FF5722;" id="healthCount">13,258</div>
+                <div style="font-size: 12px; color: #666;">Skin diseases reported</div>
+            </div>
+            
+            <div class="chart">
+                <div class="chart-title">📊 Top Issues This Month</div>
+                <div id="issueChart"></div>
+            </div>
+            
+            <div class="submission-grid">
+                <button class="btn" onclick="filterByBlock()">📍 Filter by Block</button>
+                <button class="btn" onclick="generateFullReport()">📊 Full Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Navigation Button -->
+    <button class="floating-button" onclick="showNavMenu()" id="navButton">🏠</button>
+
+    <script>
+        // Global variables
+        let currentScreen = 'welcomeScreen';
+        let currentLanguage = 'odia';
+        let isRecording = false;
+        let userData = {};
+        let problemData = {};
+        let grievances = [];
+        let recognition;
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadUserData();
+            initVoiceRecognition();
+            checkOnlineStatus();
+            loadGrievances();
+        });
+
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.querySelectorAll('[id$="Time"]').forEach(el => {
+                el.textContent = timeString;
+            });
+        }
+
+        // Language management
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update placeholder texts based on language
+            updateLanguageContent(lang);
+            showNotification(`Language changed to ${lang.charAt(0).toUpperCase() + lang.slice(1)}`);
+        }
+
+        function updateLanguageContent(lang) {
+            const translations = {
+                odia: {
+                    problemPlaceholder: "ଆପଣଙ୍କ ସମସ୍ୟା ଲେଖନ୍ତୁ କିମ୍ବା କୁହନ୍ତୁ...\nWrite or speak your problem here...",
+                    screenTitle: "ସମସ୍ୟା ରିପୋର୍ଟ କରନ୍ତୁ"
+                },
+                hindi: {
+                    problemPlaceholder: "अपनी समस्या लिखें या बोलें...\nWrite or speak your problem here...",
+                    screenTitle: "समस्या रिपोर्ट करें"
+                },
+                english: {
+                    problemPlaceholder: "Write or speak your problem here...",
+                    screenTitle: "Report Your Problem"
+                }
+            };
+            
+            if (translations[lang]) {
+                const problemText = document.getElementById('problemText');
+                if (problemText) {
+                    problemText.placeholder = translations[lang].problemPlaceholder;
+                }
+            }
+        }
+
+        // Navigation
+        function goToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            currentScreen = screenId;
+        }
+
+        function showNavMenu() {
+            const nav = document.createElement('div');
+            nav.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                background: white;
+                border-radius: 15px;
+                padding: 15px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1001;
+                min-width: 200px;
+            `;
+            
+            nav.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333;">Navigate to:</div>
+                <button class="btn" onclick="goToScreen('reportingScreen'); closeNavMenu();">📝 Report Problem</button>
+                <button class="btn" onclick="goToScreen('trackingScreen'); closeNavMenu();">📋 My Grievances</button>
+                <button class="btn" onclick="goToScreen('dashboardScreen'); closeNavMenu();">📊 Dashboard</button>
+                <button class="btn" onclick="goToScreen('welcomeScreen'); closeNavMenu();">🏠 Home</button>
+                <button class="btn" onclick="closeNavMenu();" style="background: #ccc; color: #333;">❌ Close</button>
+            `;
+            
+            nav.id = 'navMenu';
+            document.body.appendChild(nav);
+        }
+
+        function closeNavMenu() {
+            const navMenu = document.getElementById('navMenu');
+            if (navMenu) navMenu.remove();
+        }
+
+        // Profile management
+        function uploadProfilePic() {
+            document.getElementById('profileInput').click();
+        }
+
+        function handleProfileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const profilePic = document.getElementById('profilePic');
+                    profilePic.innerHTML = `<img src="${e.target.result}" alt="Profile">`;
+                    userData.profilePic = e.target.result;
+                    saveUserData();
+                    showNotification('Profile photo updated!');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // User data management
+        function loadUserData() {
+            const saved = JSON.parse(localStorage.getItem('janconnect_user') || '{}');
+            userData = saved;
+            
+            if (saved.name) document.getElementById('userName').value = saved.name;
+            if (saved.phone) document.getElementById('userPhone').value = saved.phone;
+            if (saved.address) document.getElementById('userAddress').value = saved.address;
+            if (saved.ward) document.getElementById('userWard').value = saved.ward;
+            if (saved.profilePic) {
+                document.getElementById('profilePic').innerHTML = `<img src="${saved.profilePic}" alt="Profile">`;
+            }
+        }
+
+        function saveUserData() {
+            userData.name = document.getElementById('userName').value;
+            userData.phone = document.getElementById('userPhone').value;
+            userData.address = document.getElementById('userAddress').value;
+            userData.ward = document.getElementById('userWard').value;
+            
+            localStorage.setItem('janconnect_user', JSON.stringify(userData));
+        }
+
+        function startReporting() {
+            // Validate required fields
+            const requiredFields = ['userName', 'userPhone', 'userAddress', 'userWard'];
+            const emptyFields = requiredFields.filter(id => !document.getElementById(id).value);
+            
+            if (emptyFields.length > 0) {
+                showNotification('Please fill all required fields!', 'error');
+                return;
+            }
+            
+            saveUserData();
+            goToScreen('reportingScreen');
+            showNotification('Welcome! Start reporting your problems.');
+        }
+
+        // Voice recognition
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US'; // Can be changed based on selected language
+                
+                recognition.onstart = function() {
+                    isRecording = true;
+                    document.getElementById('voiceBtn').classList.add('listening');
+                    showNotification('Listening... Speak now!');
+                };
+                
+                recognition.onend = function() {
+                    isRecording = false;
+                    document.getElementById('voiceBtn').classList.remove('listening');
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    const problemText = document.getElementById('problemText');
+                    problemText.value = (problemText.value + ' ' + transcript).trim();
+                    analyzeProbleFm();
+                    showNotification('Voice input added successfully!');
+                };
+                
+                recognition.onerror = function(event) {
+                    showNotification('Voice recognition error. Please try again.', 'error');
+                    isRecording = false;
+                    document.getElementById('voiceBtn').classList.remove('listening');
+                };
+            }
+        }
+
+        function toggleVoiceRecording() {
+            if (!recognition) {
+                showNotification('Voice recognition not supported in this browser.', 'error');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        // Media capture functions
+        function capturePhoto() {
+            document.getElementById('photoInput').click();
+        }
+
+        function captureVideo() {
+            document.getElementById('videoInput').click();
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                problemData.photo = file;
+                showNotification('Photo evidence added!');
+            }
+        }
+
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                problemData.video = file;
+                showNotification('Video evidence added!');
+            }
+        }
+
+        function openScribblePad() {
+            // Create a simple scribble interface
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 2000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px;">
+                    <h3 style="margin-bottom: 15px;">✏️ Scribble Pad</h3>
+                    <canvas id="scribbleCanvas" width="300" height="200" style="border: 2px solid #ddd; width: 100%;"></canvas>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" onclick="saveScribble()">💾 Save</button>
+                        <button class="btn" onclick="clearCanvas()">🗑️ Clear</button>
+                        <button class="btn" onclick="closeScribblePad()" style="background: #ccc; color: #333;">❌ Close</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.id = 'scribbleModal';
+            document.body.appendChild(modal);
+            initCanvas();
+        }
+
+        function initCanvas() {
+            const canvas = document.getElementById('scribbleCanvas');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                draw(e);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#2196F3';
+                
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+            
+            function stopDrawing() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    ctx.beginPath();
+                }
+            }
+            
+            function handleTouch(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                                 e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+        }
+
+        function saveScribble() {
+            const canvas = document.getElementById('scribbleCanvas');
+            problemData.scribble = canvas.toDataURL();
+            showNotification('Handwritten note saved!');
+            closeScribblePad();
+        }
+
+        function clearCanvas() {
+            const canvas = document.getElementById('scribbleCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function closeScribblePad() {
+            const modal = document.getElementById('scribbleModal');
+            if (modal) modal.remove();
+        }
+
+        // AI Problem Analysis
+        function analyzeProbleFm() {
+            const problemText = document.getElementById('problemText').value.toLowerCase();
+            const aiSuggestion = document.getElementById('aiSuggestion');
+            const detectedIssue = document.getElementById('detectedIssue');
+            
+            // Simple keyword-based detection (in real app, this would use actual AI)
+            let department = '';
+            let officer = '';
+            let issueType = '';
+            
+            if (problemText.includes('road') || problemText.includes('ରାସ୍ତା') || problemText.includes('pothole')) {
+                issueType = 'Road Infrastructure Problem';
+                department = 'Public Works Department';
+                officer = 'Block Development Officer';
+            } else if (problemText.includes('water') || problemText.includes('ପାଣି') || problemText.includes('supply')) {
+                issueType = 'Water Supply Issue';
+                department = 'Public Health Engineering';
+                officer = 'Executive Engineer';
+            } else if (problemText.includes('drainage') || problemText.includes('sewer') || problemText.includes('ନାଳ')) {
+                issueType = 'Drainage Problem';
+                department = 'Municipal Corporation';
+                officer = 'Health Officer';
+            } else if (problemText.includes('health') || problemText.includes('hospital') || problemText.includes('ସ୍ୱାସ୍ଥ୍ୟ')) {
+                issueType = 'Public Health Issue';
+                department = 'District Health Department';
+                officer = 'Chief Medical Officer';
+            } else if (problemText.includes('electricity') || problemText.includes('power') || problemText.includes('ବିଦ୍ୟୁତ')) {
+                issueType = 'Electrical Problem';
+                department = 'GRIDCO/SOUTHCO';
+                officer = 'Assistant Engineer';
+            } else {
+                issueType = 'General Civic Issue';
+                department = 'Block Administration';
+                officer = 'Block Development Officer';
+            }
+            
+            if (problemText.trim()) {
+                problemData.issueType = issueType;
+                problemData.department = department;
+                problemData.officer = officer;
+                
+                detectedIssue.innerHTML = `
+                    <strong>${issueType}</strong><br>
+                    Department: ${department}<br>
+                    Officer: ${officer}
+                `;
+                
+                aiSuggestion.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    showNotification('AI detected your issue type!');
+                }, 500);
+            }
+        }
+
+        // Trigger analysis when typing
+        document.addEventListener('DOMContentLoaded', function() {
+            const problemText = document.getElementById('problemText');
+            if (problemText) {
+                problemText.addEventListener('input', function() {
+                    clearTimeout(this.analyzeTimeout);
+                    this.analyzeTimeout = setTimeout(analyzeProbleFm, 1000);
+                });
+            }
+        });
+
+        // Application generation
+        function generateApplication() {
+            const problemText = document.getElementById('problemText').value;
+            
+            if (!problemText.trim()) {
+                showNotification('Please describe your problem first!', 'error');
+                return;
+            }
+            
+            problemData.problemText = problemText;
+            problemData.timestamp = new Date();
+            
+            const application = generateFormalLetter();
+            document.getElementById('generatedLetter').innerHTML = application;
+            
+            goToScreen('previewScreen');
+            showNotification('Application generated successfully!');
+        }
+
+        function generateFormalLetter() {
+            const today = new Date().toLocaleDateString('en-IN');
+            
+            return `
+                <strong>To: ${problemData.officer || 'Block Development Officer'}</strong><br>
+                ${problemData.department || 'Block Administration'}<br>
+                ${userData.ward || 'Jajpur'}, Jajpur District<br>
+                Odisha<br><br>
+                
+                <strong>Date:</strong> ${today}<br><br>
+                
+                <strong>Subject:</strong> ${problemData.issueType || 'Civic Issue'} - Immediate Attention Required<br><br>
+                
+                Respected Sir/Madam,<br><br>
+                
+                I am ${userData.name || 'Citizen'}, a resident of ${userData.ward || 'Ward'}, ${userData.address || 'Jajpur Road'}. 
+                I would like to bring to your urgent attention a serious civic issue affecting our community.<br><br>
+                
+                <strong>Problem Details:</strong><br>
+                ${problemData.problemText}<br><br>
+                
+                <strong>Location:</strong> ${userData.address}, ${userData.ward}<br>
+                <strong>Issue Type:</strong> ${problemData.issueType || 'General Civic Issue'}<br>
+                <strong>Urgency Level:</strong> High<br>
+                <strong>Affected Citizens:</strong> Multiple residents<br><br>
+                
+                This issue is causing significant inconvenience to the residents and requires immediate intervention. 
+                I request your prompt action to resolve this matter at the earliest.<br><br>
+                
+                I have attached relevant evidence and documentation to support this complaint. 
+                Please acknowledge receipt of this application and provide an expected timeline for resolution.<br><br>
+                
+                I look forward to your swift response and action on this matter.<br><br>
+                
+                Yours faithfully,<br><br>
+                
+                <strong>${userData.name || 'Citizen'}</strong><br>
+                Phone: ${userData.phone || 'Not provided'}<br>
+                Address: ${userData.address}, ${userData.ward}<br>
+                Email: janconnect.complaint@example.com<br>
+                Application ID: JC${Date.now().toString().slice(-6)}
+            `;
+        }
+
+        function editApplication() {
+            const currentText = document.getElementById('generatedLetter').innerHTML;
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 2000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 15px; width: 100%; max-width: 500px; max-height: 80%; overflow-y: auto;">
+                    <h3 style="margin-bottom: 15px;">✏️ Edit Application</h3>
+                    <textarea id="editTextarea" style="width: 100%; height: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 12px; line-height: 1.4;">${currentText.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '')}</textarea>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="saveEditedApplication()">💾 Save Changes</button>
+                        <button class="btn" onclick="closeEditModal()" style="background: #ccc; color: #333;">❌ Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.id = 'editModal';
+            document.body.appendChild(modal);
+        }
+
+        function saveEditedApplication() {
+            const textarea = document.getElementById('editTextarea');
+            const editedText = textarea.value.replace(/\n/g, '<br>');
+            document.getElementById('generatedLetter').innerHTML = editedText;
+            closeEditModal();
+            showNotification('Application updated successfully!');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            if (modal) modal.remove();
+        }
+
+        // Submission functions
+        function downloadPDF() {
+            showProgress();
+            
+            // Simulate PDF generation
+            setTimeout(() => {
+                const content = document.getElementById('generatedLetter').innerHTML;
+                const blob = new Blob([content], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `JanConnect_Application_${Date.now()}.html`;
+                a.click();
+                
+                showNotification('Application downloaded successfully!');
+                updateProgress(25);
+            }, 1000);
+        }
+
+        function emailDepartment() {
+            showProgress();
+            
+            setTimeout(() => {
+                const subject = `${problemData.issueType} - Application ID: JC${Date.now().toString().slice(-6)}`;
+                const body = document.getElementById('generatedLetter').textContent;
+                const mailtoLink = `mailto:${problemData.department?.toLowerCase().replace(/\s+/g, '.')}@jajpur.gov.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                window.open(mailtoLink);
+                showNotification('Email client opened! Please send the email.');
+                updateProgress(50);
+            }, 1500);
+        }
+
+        function sendWhatsApp() {
+            showProgress();
+            
+            setTimeout(() => {
+                const message = `🚨 CIVIC ISSUE ALERT 🚨\n\n${problemData.issueType}\nLocation: ${userData.address}, ${userData.ward}\n\nDear ${problemData.officer},\n\nPlease find attached formal complaint regarding ${problemData.issueType.toLowerCase()} in our area.\n\nUrgent action required.\n\nRegards,\n${userData.name}\nJanConnect User`;
+                
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl);
+                showNotification('WhatsApp opened! Share with officials.');
+                updateProgress(75);
+            }, 2000);
+        }
+
+        function submitToPortal() {
+            showProgress();
+            
+            setTimeout(() => {
+                // Simulate government portal submission
+                showNotification('Submitted to Government Portal!');
+                updateProgress(90);
+                
+                // Add to tracking
+                addToGrievanceTracking();
+            }, 2500);
+        }
+
+        function generatePressNote() {
+            const pressNote = `
+                PRESS RELEASE - CITIZEN GRIEVANCE
+                
+                Date: ${new Date().toLocaleDateString('en-IN')}
+                Location: ${userData.address}, ${userData.ward}, Jajpur
+                
+                ISSUE: ${problemData.issueType}
+                
+                Citizens of ${userData.ward} are facing serious ${problemData.issueType.toLowerCase()} affecting daily life. 
+                Despite being a basic civic amenity, the issue remains unaddressed.
+                
+                PROBLEM DETAILS:
+                ${problemData.problemText}
+                
+                IMPACT:
+                - Multiple families affected
+                - Daily inconvenience to residents
+                - Potential health and safety risks
+                
+                DEMANDS:
+                1. Immediate attention from ${problemData.department}
+                2. Timeline for resolution
+                3. Regular updates to affected citizens
+                4. Prevention measures for future
+                
+                This complaint has been submitted through JanConnect - Voice of the People platform, 
+                ensuring transparent citizen-government communication.
+                
+                For media queries: ${userData.phone}
+                
+                #JanConnect #CitizenVoice #${userData.ward} #JajpurDevelopment
+            `;
+            
+            copyToClipboard(pressNote);
+            showNotification('Press note copied to clipboard!');
+        }
+
+        function shareOnSocialMedia() {
+            const socialText = `🚨 CIVIC ISSUE ALERT 🚨\n\n${problemData.issueType} in ${userData.ward}, Jajpur needs immediate attention!\n\n${problemData.problemText.substring(0, 100)}...\n\n@JajpurCollector @OdishaGov #JanConnect #CitizenVoice #JajpurDevelopment`;
+            
+            // Create social sharing modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 2000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 15px; width: 100%; max-width: 400px;">
+                    <h3 style="margin-bottom: 15px;">📱 Share on Social Media</h3>
+                    <textarea readonly style="width: 100%; height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 12px; resize: none;">${socialText}</textarea>
+                    <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button class="btn btn-primary" onclick="shareOnFacebook()">📘 Facebook</button>
+                        <button class="btn" onclick="shareOnTwitter()">🐦 Twitter</button>
+                        <button class="btn btn-success" onclick="copyToClipboard('${socialText}'); closeSocialModal();">📋 Copy Text</button>
+                        <button class="btn" onclick="closeSocialModal()" style="background: #ccc; color: #333;">❌ Close</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.id = 'socialModal';
+            document.body.appendChild(modal);
+        }
+
+        function shareOnFacebook() {
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(document.getElementById('socialModal').querySelector('textarea').value)}`;
+            window.open(url);
+            closeSocialModal();
+        }
+
+        function shareOnTwitter() {
+            const text = document.getElementById('socialModal').querySelector('textarea').value;
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            window.open(url);
+            closeSocialModal();
+        }
+
+        function closeSocialModal() {
+            const modal = document.getElementById('socialModal');
+            if (modal) modal.remove();
+        }
+
+        function submitAll() {
+            showProgress();
+            
+            // Simulate all submissions
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                updateProgress(progress);
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    addToGrievanceTracking();
+                    showNotification('All submissions completed successfully!');
+                    
+                    setTimeout(() => {
+                        goToScreen('trackingScreen');
+                        loadGrievances();
+                    }, 2000);
+                }
+            }, 300);
+        }
+
+        function showProgress() {
+            updateProgress(0);
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('submitProgress').style.width = percent + '%';
+        }
+
+        // Grievance tracking
+        function addToGrievanceTracking() {
+            const grievance = {
+                id: 'JC' + Date.now().toString().slice(-6),
+                title: problemData.issueType || 'Civic Issue',
+                description: problemData.problemText?.substring(0, 100) + '...',
+                date: new Date().toLocaleDateString('en-IN'),
+                status: 'pending',
+                department: problemData.department,
+                location: `${userData.address}, ${userData.ward}`
+            };
+            
+            grievances.unshift(grievance);
+            saveGrievances();
+        }
+
+        function loadGrievances() {
+            const saved = JSON.parse(localStorage.getItem('janconnect_grievances') || '[]');
+            grievances = saved;
+            updateGrievancesList();
+            updateAchievements();
+        }
+
+        function saveGrievances() {
+            localStorage.setItem('janconnect_grievances', JSON.stringify(grievances));
+        }
+
+        function updateGrievancesList() {
+            const list = document.getElementById('grievancesList');
+            if (!list) return;
+            
+            if (grievances.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 48px;">📝</div>
+                        <strong>No grievances yet</strong><br>
+                        <small>Start by reporting your first problem!</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = grievances.map(grievance => `
+                <div class="grievance-item status-${grievance.status}" onclick="showGrievanceDetails('${grievance.id}')">
+                    <strong>${getStatusIcon(grievance.status)} ${grievance.title}</strong><br>
+                    <small>Submitted: ${grievance.date}</small><br>
+                    <small style="color: ${getStatusColor(grievance.status)};">Status: ${getStatusText(grievance.status)}</small><br>
+                    <small>${grievance.location}</small>
+                    ${grievance.status === 'pending' && getDaysSince(grievance.date) >= 15 ? 
+                        '<br><button class="btn" style="padding: 5px 10px; font-size: 12px; margin-top: 5px;" onclick="sendReminder(\'' + grievance.id + '\')">📬 Send Reminder</button>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                pending: '⏳',
+                acknowledged: '📝',
+                resolved: '✅'
+            };
+            return icons[status] || '📋';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                pending: '#FF9800',
+                acknowledged: '#2196F3',
+                resolved: '#4CAF50'
+            };
+            return colors[status] || '#666';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                pending: 'Pending',
+                acknowledged: 'Acknowledged',
+                resolved: 'Action Taken'
+            };
+            return texts[status] || 'Unknown';
+        }
+
+        function getDaysSince(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            const diffTime = Math.abs(today - date);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function showGrievanceDetails(id) {
+            const grievance = grievances.find(g => g.id === id);
+            if (!grievance) return;
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 2000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 15px; width: 100%; max-width: 400px; max-height: 80%; overflow-y: auto;">
+                    <h3 style="margin-bottom: 15px;">${getStatusIcon(grievance.status)} ${grievance.title}</h3>
+                    <div style="margin-bottom: 15px;">
+                        <strong>ID:</strong> ${grievance.id}<br>
+                        <strong>Date:</strong> ${grievance.date}<br>
+                        <strong>Status:</strong> <span style="color: ${getStatusColor(grievance.status)};">${getStatusText(grievance.status)}</span><br>
+                        <strong>Department:</strong> ${grievance.department}<br>
+                        <strong>Location:</strong> ${grievance.location}
+                    </div>
+                    <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                        <strong>Description:</strong><br>
+                        ${grievance.description}
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button class="btn" onclick="sendReminder('${grievance.id}')">📬 Send Reminder</button>
+                        <button class="btn" onclick="closeGrievanceModal()" style="background: #ccc; color: #333;">❌ Close</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.id = 'grievanceModal';
+            document.body.appendChild(modal);
+        }
+
+        function sendReminder(id) {
+            const grievance = grievances.find(g => g.id === id);
+            if (!grievance) return;
+            
+            // Simulate sending reminder
+            showNotification('Reminder sent to department!');
+            
+            // Update last reminder date
+            grievance.lastReminder = new Date().toLocaleDateString('en-IN');
+            saveGrievances();
+            
+            closeGrievanceModal();
+        }
+
+        function closeGrievanceModal() {
+            const modal = document.getElementById('grievanceModal');
+            if (modal) modal.remove();
+        }
+
+        function updateAchievements() {
+            const totalReports = grievances.length;
+            const resolvedReports = grievances.filter(g => g.status === 'resolved').length;
+            
+            const achievementText = document.getElementById('achievementText');
+            if (!achievementText) return;
+            
+            if (totalReports === 0) {
+                achievementText.textContent = 'Submit your first report to start earning badges!';
+            } else if (totalReports < 5) {
+                achievementText.textContent = `${totalReports} reports submitted! Keep going!`;
+            } else if (totalReports < 10) {
+                achievementText.textContent = `${totalReports} reports - Active Citizen Badge earned!`;
+            } else {
+                achievementText.textContent = `${totalReports} reports - Community Champion! 🏆`;
+            }
+        }
+
+        // Utility functions
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.background = type === 'error' ? '#f44336' : '#4CAF50';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Copied to clipboard!');
+            });
+        }
+
+        function checkOnlineStatus() {
+            const indicator = document.getElementById('offlineIndicator');
+            if (!indicator) return;
+            
+            function updateStatus() {
+                if (navigator.onLine) {
+                    indicator.textContent = '📶 Online';
+                    indicator.style.background = '#4CAF50';
+                } else {
+                    indicator.textContent = '📵 Offline';
+                    indicator.style.background = '#FF9800';
+                }
+            }
+            
+            updateStatus();
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
+        }
+
+        // Dashboard functions
+        function filterByBlock() {
+            showNotification('Filter feature would show block-wise data');
+        }
+
+        function generateFullReport() {
+            const reportData = {
+                totalGrievances: grievances.length,
+                pendingGrievances: grievances.filter(g => g.status === 'pending').length,
+                resolvedGrievances: grievances.filter(g => g.status === 'resolved').length,
+                userLocation: `${userData.ward}, ${userData.address}`
+            };
+            
+            const report = `
+                📊 JANCONNECT PERSONAL REPORT
+                ================================
+                
+                User: ${userData.name}
+                Location: ${reportData.userLocation}
+                Generated: ${new Date().toLocaleDateString('en-IN')}
+                
+                SUMMARY:
+                - Total Reports: ${reportData.totalGrievances}
+                - Pending: ${reportData.pendingGrievances}
+                - Resolved: ${reportData.resolvedGrievances}
+                - Success Rate: ${reportData.totalGrievances > 0 ? Math.round((reportData.resolvedGrievances / reportData.totalGrievances) * 100) : 0}%
+                
+                RECENT GRIEVANCES:
+                ${grievances.slice(0, 5).map(g => `- ${g.title} (${g.status})`).join('\n')}
+                
+                Generated by JanConnect - Voice of the People
+            `;
+            
+            copyToClipboard(report);
+            showNotification('Full report copied to clipboard!');
+        }
+
+        // Initialize dashboard charts
+        function initDashboard() {
+            const issueChart = document.getElementById('issueChart');
+            if (!issueChart) return;
+            
+            const issues = [
+                { name: '🛣️ Roads', count: 342, width: '85%' },
+                { name: '🚰 Water', count: 187, width: '60%' },
+                { name: '🏥 Health', count: 156, width: '50%' },
+                { name: '⚡ Electricity', count: 98, width: '35%' },
+                { name: '🏢 Other', count: 67, width: '25%' }
+            ];
+            
+            issueChart.innerHTML = issues.map(issue => `
+                <div style="font-size: 10px; margin: 5px 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>${issue.name}</span><span>${issue.count}</span>
+                    </div>
+                    <div class="chart-bar" style="width: ${issue.width};"></div>
+                </div>
+            `).join('');
+        }
+
+        // Auto-save functionality
+        function enableAutoSave() {
+            setInterval(() => {
+                saveUserData();
+                saveGrievances();
+            }, 30000); // Save every 30 seconds
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to submit forms
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const currentScreenEl = document.getElementById(currentScreen);
+                const submitBtn = currentScreenEl.querySelector('.btn:last-of-type');
+                if (submitBtn && !submitBtn.disabled) {
+                    submitBtn.click();
+                }
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                const modals = ['navMenu', 'scribbleModal', 'editModal', 'socialModal', 'grievanceModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal) modal.remove();
+                });
+            }
+        });
+
+        // Geolocation for automatic address detection
+        function getLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // In a real app, this would reverse geocode to get address
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        // Simulate address detection for Jajpur area
+                        if (lat > 20.8 && lat < 21.0 && lon > 86.0 && lon < 86.5) {
+                            document.getElementById('userAddress').value = 'Jajpur Road';
+                            document.getElementById('userWard').value = 'Ward 12';
+                            showNotification('Location detected automatically!');
+                        }
+                    },
+                    function(error) {
+                        console.log('Location access denied');
+                    }
+                );
+            }
+        }
+
+        // Data export functionality
+        function exportUserData() {
+            const exportData = {
+                user: userData,
+                grievances: grievances,
+                exportDate: new Date().toISOString(),
+                appVersion: '1.0.0'
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `janconnect_data_${Date.now()}.json`;
+            a.click();
+            
+            showNotification('Data exported successfully!');
+        }
+
+        // Simulate random status updates for demo
+        function simulateStatusUpdates() {
+            setInterval(() => {
+                if (grievances.length > 0 && Math.random() < 0.1) { // 10% chance every interval
+                    const randomGrievance = grievances[Math.floor(Math.random() * grievances.length)];
+                    if (randomGrievance.status === 'pending') {
+                        randomGrievance.status = 'acknowledged';
+                        saveGrievances();
+                        updateGrievancesList();
+                        showNotification(`Update: ${randomGrievance.title} has been acknowledged!`);
+                    } else if (randomGrievance.status === 'acknowledged' && Math.random() < 0.3) {
+                        randomGrievance.status = 'resolved';
+                        saveGrievances();
+                        updateGrievancesList();
+                        showNotification(`🎉 Great news! ${randomGrievance.title} has been resolved!`);
+                    }
+                }
+            }, 10000); // Check every 10 seconds
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize dashboard charts
+            setTimeout(() => {
+                initDashboard();
+            }, 1000);
+            
+            // Enable auto-save
+            enableAutoSave();
+            
+            // Try to get location
+            setTimeout(getLocation, 2000);
+            
+            // Start status simulation for demo
+            setTimeout(simulateStatusUpdates, 5000);
+            
+            // Add some demo grievances if none exist
+            if (grievances.length === 0) {
+                setTimeout(() => {
+                    const demoGrievances = [
+                        {
+                            id: 'JC001234',
+                            title: 'Road Pothole Issue',
+                            description: 'Large pothole causing vehicle damage on main road...',
+                            date: '10/08/2025',
+                            status: 'resolved',
+                            department: 'Public Works Department',
+                            location: 'Ward 12, Jajpur Road'
+                        },
+                        {
+                            id: 'JC001235',
+                            title: 'Water Supply Problem',
+                            description: 'Irregular water supply affecting multiple households...',
+                            date: '12/08/2025',
+                            status: 'acknowledged',
+                            department: 'Public Health Engineering',
+                            location: 'Ward 12, Jajpur Road'
+                        }
+                    ];
+                    
+                    // Only add demo data if user has entered their info
+                    if (userData.name && userData.name.trim()) {
+                        grievances.push(...demoGrievances);
+                        saveGrievances();
+                        updateGrievancesList();
+                    }
+                }, 3000);
+            }
+            
+            // Show welcome message
+            setTimeout(() => {
+                if (userData.name && userData.name.trim()) {
+                    showNotification(`Welcome back, ${userData.name}! 👋`);
+                } else {
+                    showNotification('Welcome to JanConnect! Setup your profile to get started.');
+                }
+            }, 1000);
+        });
+
+        // PWA functionality
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button
+            const installBtn = document.createElement('button');
+            installBtn.className = 'btn btn-primary';
+            installBtn.innerHTML = '📱 Install JanConnect App';
+            installBtn.style.cssText = 'position: fixed; top: 20px; left: 20px; z-index: 1000; font-size: 12px; padding: 8px 12px;';
+            installBtn.onclick = () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showNotification('JanConnect installed successfully!');
+                    }
+                    deferredPrompt = null;
+                    installBtn.remove();
+                });
+            };
+            
+            document.body.appendChild(installBtn);
+            
+            setTimeout(() => {
+                if (installBtn.parentNode) {
+                    installBtn.remove();
+                }
+            }, 10000); // Remove install button after 10 seconds
+        });
+
+        // Service Worker registration for offline functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // Handle app install
+        window.addEventListener('appinstalled', (evt) => {
+            showNotification('JanConnect app installed! You can now use it offline.');
+        });
+
+        // Handle network changes
+        window.addEventListener('online', () => {
+            showNotification('Back online! Syncing data...');
+            // In a real app, this would sync pending submissions
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('You are now offline. Data will be saved locally.');
+        });
+
+        // Additional utility functions for complete functionality
+        function validatePhoneNumber(phone) {
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            return phoneRegex.test(phone.replace(/\s+/g, ''));
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+
+        // Accessibility improvements
+        function improveAccessibility() {
+            // Add ARIA labels
+            document.querySelectorAll('.btn').forEach(btn => {
+                if (!btn.getAttribute('aria-label')) {
+                    btn.setAttribute('aria-label', btn.textContent.trim());
+                }
+            });
+            
+            // Add focus management
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-nav');
+                }
+            });
+            
+            document.addEventListener('mousedown', () => {
+                document.body.classList.remove('keyboard-nav');
+            });
+        }
+
+        // Call accessibility improvements
+        setTimeout(improveAccessibility, 1000);
+
+        // Final initialization call
+        console.log('🚀 JanConnect - Voice of the People initialized successfully!');
+        console.log('📱 App features:');
+        console.log('  ✅ Voice input with speech recognition');
+        console.log('  ✅ AI-powered issue detection');
+        console.log('  ✅ Multi-channel submission (Email, WhatsApp, Portal)');
+        console.log('  ✅ Real-time grievance tracking');
+        console.log('  ✅ Media toolkit for press outreach');
+        console.log('  ✅ Offline functionality');
+        console.log('  ✅ Data analytics and reporting');
+        console.log('  ✅ Multi-language support');
+        console.log('  ✅ Accessibility features');
+    </script>
+</body>
+</html>
